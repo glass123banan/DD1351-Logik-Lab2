@@ -1,11 +1,17 @@
 % [LineNr, Expr, Rule]
 % check if step belongs to prems
 valid_line(Prems, _, [LineNr, Expr, Premise], _) :-
-    member(Expr, Prems). 
+    member(Expr, Prems),
+    write('line prems: '),
+    write(LineNr),
+    write('\n'). 
 
 % check if line belongs to goal 
 valid_line(_, Goal, [LineNr, Expr, _], _) :-
-    member(Expr, Goal).
+    member(Expr, Goal),
+    write('linenr goal: '),
+    write(LineNr),
+    write('\n').
 
 % valid_proof calls on helper func w validated steps
 valid_proof(Prems, Goal, ProofSteps) :-
@@ -19,7 +25,6 @@ valid_proof_validator(_, Goal, [], ValidatedSoFar) :-
 
 % helper func that stores checked lines in ValidatedSoFar
 valid_proof_validator(Prems, Goal, [Step | RestOfProof], ValidatedSoFar) :-
-    write('valid_proof_validator'),
     valid_line(Prems, Goal, Step, ValidatedSoFar), 
     valid_proof_validator(Prems, Goal, RestOfProof, [Step | ValidatedSoFar]).
 
@@ -33,10 +38,15 @@ or(P, Q).    % p v q
 
 % Implication Elimination (Modus Ponens, →E)
 valid_line(_, _, [LineNr, ImpelExpr, impel(X, Y)], ValidatedSoFar) :-
+    write('1'),
     nth1(X, ValidatedSoFar, [X, Antecedent, _]),
+    write('2'),
     nth1(Y, ValidatedSoFar, [Y, imp(Antecedent, Conclusion), _]),
-    write('hello'),
-    Conclusion is ImpelExpr.
+    write('3'),
+    Conclusion = ImpelExpr,
+    write('impen line: '),
+    write(LineNr),
+    write('\n').
 
 % valid proof check recursive case
 
@@ -67,4 +77,10 @@ verify(InputFileName) :-
     read(Goal),             % read goals
     read(Proof),            % read proof steps
     seen,                   % close file
-    ( valid_proof(Prems, Goal, ProofSteps) -> write('yes') ; write('no') ).
+    write(Prems),
+    write('\n'),
+    write(Goal),
+    write('\n'),
+    write(Proof),
+    write('\n'),
+    ( valid_proof(Prems, Goal, Proof) -> write('yes') ; write('no') ).
