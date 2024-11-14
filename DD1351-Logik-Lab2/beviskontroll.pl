@@ -1,23 +1,28 @@
-% propositioner
-imp(P, Q)   % p -> q
-neg(P)      % !p
-and(P, Q)   % p n q
-or(P, Q)    % p v q
-
+% [LineNr, Expr, Rule]
 % check if step belongs to prems
-valid_line(Prems, Goal, Step) :-
-    member(Step, Prems). 
+valid_line(Prems, _, [LineNr, Expr, Premise], _) :-
+    member(Expr, Prems). 
 
-% check some rule
-valid_line(Prems, Goal, Step) :-
-    % todo
+% check if line belongs to goal 
+valid_line(_, Goal, [LineNr, Expr, _], _) :-
+    member(Expr, Goal).
+
+% check if line uses andint
+valid_line(_, _, (A, B), ValidatedSoFar) :-
+    member(A, ValidatedSoFar),
+    member(B, ValidatedSoFar).
+
+% check if line uses andel
+
+% helper func that stores checked lines in ValidatedSoFar
+valid_proof_validator(Prems, Goal, [Step | RestOfProof], ValidatedSoFar) :-
+    valid_line(Prems, Goal, Step, [Step | RestOfProof]), 
+    valid_proof_validator(Prems, Goal, RestOfProof, [Step | ValidatedSoFar]).
 
 
-
-% valid proof check
-valid_proof(Prems, Goal, [Step | RestOfProof]) :-
-    valid_line(Prems, Goal, Step),
-    valid_proof(Prems, Goal, RestOfProof).
+% valid proof check recursive case
+valid_proof(Prems, Goal, Proof) :-
+    valid_proof_validator(Prems, Goal, Proof, []).
 
 % verify -> read file
 verify(InputFileName) :- 
