@@ -1,0 +1,11 @@
+**Premises:**
+[neg(neg(p))].
+
+**Conclusion:**
+p.
+
+**Proof:**
+[
+  [1, neg(neg(p)),  premise],
+  [2, p,            negnegel(1)]
+].

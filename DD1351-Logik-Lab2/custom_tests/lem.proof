@@ -1,0 +1,10 @@
+**Premises:**
+[].
+
+**Conclusion:**
+or(p, neg(p)).
+
+**Proof:**
+[
+  [1, or(p, neg(p)), lem]
+].
