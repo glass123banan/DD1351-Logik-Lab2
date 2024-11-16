@@ -60,7 +60,7 @@ valid_line(_,_, [LineNr, CopyExpr, copy(X)], ValidatedSoFar) :-
 % [Box | _] from ValidatedSoFar (in valid_proof_validator)
 valid_line(_,_, [LineNr, imp(Antecedent, Conclusion), impint(X,Y)], [Box | _]) :-
     write("starting impint..."), nl,
-    member([X, Antecedent, assumption], Box), fail,
+    member([X, Antecedent, assumption], Box), !,
     write("check antecedent: "), write(Antecedent), nl, 
     member([Y, Conclusion, _], Box), !,
     write("check conclusion: "), write(Conclusion), nl.
@@ -136,9 +136,7 @@ valid_line(_,_,[LineNr, or(LemExpr, neg(LemExpr)), lem], ValidatedSoFar).
 % verify -> read file
 verify(InputFileName) :- 
     see(InputFileName),     % open file with InputFileName
-    read(Prems),            % read premises
-    read(Goal),             % read goals
-    read(Proof),            % read proof steps
+    read(Prems), read(Goal), read(Proof),            
     seen,                   % close file
     write(Prems), nl,
     write(Goal), nl,
