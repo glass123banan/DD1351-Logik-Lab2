@@ -9,7 +9,7 @@ else
         echo "Usage: . run_all_tests your_solution.pl"
         
     else
-        prolog -g "['run_all_tests.pl'], run_all_tests('$1')" 
+        swipl -g "['run_all_tests.pl'], run_all_tests('$1')" 
     fi
 fi
 

@@ -1,0 +1,59 @@
+valid01.txt passed
+valid02.txt passed
+valid03.txt passed
+valid04.txt passed
+valid05.txt passed
+valid06.txt passed
+valid07.txt passed
+valid08.txt passed
+valid09.txt passed
+valid10.txt passed
+valid11.txt passed
+valid12.txt passed
+valid13.txt passed
+valid14.txt passed
+valid15.txt passed
+valid16.txt passed
+valid17.txt passed
+valid18.txt passed
+valid19.txt passed
+valid20.txt passed
+valid21.txt passed
+valid22.txt passed
+valid23.txt passed
+invalid01.txt failed. The proof is invalid but your program accepted it!
+invalid02.txt passed
+invalid03.txt failed. The proof is invalid but your program accepted it!
+invalid04.txt passed
+invalid05.txt passed
+invalid06.txt passed
+invalid07.txt passed
+invalid08.txt passed
+invalid09.txt passed
+invalid10.txt passed
+invalid11.txt passed
+invalid12.txt passed
+invalid13.txt passed
+invalid14.txt passed
+invalid15.txt passed
+invalid16.txt failed. The proof is invalid but your program accepted it!
+invalid17.txt passed
+invalid18.txt passed
+invalid19.txt passed
+invalid20.txt passed
+invalid21.txt passed
+invalid22.txt failed. The proof is invalid but your program accepted it!
+invalid23.txt passed
+invalid24.txt passed
+invalid25.txt passed
+invalid26.txt passed
+invalid27.txt failed. The proof is invalid but your program accepted it!
+invalid28.txt passed
+invalid29.txt failed. The proof is invalid but your program accepted it!
+invalid30.txt passed
+invalid31.txt passed
+invalid32.txt failed. The proof is invalid but your program accepted it!
+invalid33.txt passed
+invalid34.txt passed
+invalid35.txt passed
+invalid36.txt passed

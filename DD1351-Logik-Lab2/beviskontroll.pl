@@ -9,20 +9,25 @@ valid_proof(Prems, Goal, ProofSteps) :-
     valid_proof_validator(Prems, Goal, ProofSteps, []).
 
 % basecase: check if Goal is present in ValidatedSoFar
-valid_proof_validator(_, Goal, [], ValidatedSoFar) :-
-    member([_,Goal,_], ValidatedSoFar).
+valid_proof_validator(_, Goal, [], [LastStep | ValidatedSoFar]) :-
+    \+ [_, Goal, assumption] = LastStep,
+    [_,Goal,_] = LastStep.
+    write("Proof valid since last step is: "), write(LastStep), write(" "), write(Goal), nl. 
 
 % box recursive case: checks if its a box -> handles boxes
 valid_proof_validator(Prems, Goal, [Box | RestOfProof], ValidatedSoFar) :-
     is_box(Box, ValidatedSoFar),       
     write("Box: "), write(Box), nl, 
     write("Rest of proof: "), write(RestOfProof), nl,
+    check_boxes(Box, ValidatedSoFar),  % Validate the content of the box
     !,      % if find box, dont go to recursive case
     valid_proof_validator(Prems, Goal, RestOfProof, [Box | ValidatedSoFar]).  
 
 % recursive case: helper func that stores checked lines in ValidatedSoFar -> handles regular lines
 valid_proof_validator(Prems, Goal, [Step | RestOfProof], ValidatedSoFar) :-
+    \+is_box(Step, ValidatedSoFar),
     write("normal line check: "), write(Step), nl,
+    write("Validated so far (from normal): "), write(ValidatedSoFar), nl, 
     valid_line(Prems, Goal, Step, ValidatedSoFar), 
     valid_proof_validator(Prems, Goal, RestOfProof, [Step | ValidatedSoFar]).
 
@@ -30,8 +35,8 @@ valid_proof_validator(Prems, Goal, [Step | RestOfProof], ValidatedSoFar) :-
 is_box(BoxStep, ValidatedSoFar) :-
     is_list(BoxStep),
     BoxStep = [[_,_, assumption]| _],
-    write("Found a box: "), write(BoxStep), nl,
-    check_boxes(BoxStep, ValidatedSoFar).
+    write("Box structure identified: "), write(BoxStep), nl.
+    % check_boxes(BoxStep, ValidatedSoFar).
 
 % recursively checks steps inside a box
 check_boxes([], _).
@@ -39,25 +44,31 @@ check_boxes([], _).
 % If the step is a nested box, validate it recursively
 check_boxes([NestedBox | RestOfBox], ValidatedSoFar) :-
     is_box(NestedBox, ValidatedSoFar),                 
-    write("Checking nested box: "), write(NestedBox), nl,                   
-    check_boxes(RestOfBox, ValidatedSoFar). 
+    write("Checking nested box: "), write(NestedBox), nl, 
+    check_boxes(NestedBox, ValidatedSoFar),  % Validate the nested box                  
+    check_boxes(RestOfBox, [NestedBox |ValidatedSoFar]). 
 
-check_boxes([StepInBox|RestOfBoxproof], ValidatedBoxProof) :-
+check_boxes([StepInBox|RestOfBox], ValidatedSoFar) :-
+    \+is_box(StepInBox, ValidatedSoFar),
     write("Checking step in box: "), write(StepInBox), nl,
-    valid_line(_,_,StepInBox, ValidatedBoxProof),
-    write("Step in box validated: "), nl,
-    check_boxes(RestOfBoxproof, ValidatedBoxProof). 
+    write("validated box proof: "), write(ValidatedSoFar), nl, 
+    valid_line(_,_,StepInBox, ValidatedSoFar),
+    write("Step in box validated: "), write(StepInBox), nl,
+    check_boxes(RestOfBox, [StepInBox | ValidatedSoFar]). 
 
 % Check each individual line if its valid
 % Format per proof line: [LineNr, Expr, Rule]
 
 % check if step belongs to prems
-valid_line(Prems, _, [LineNr, Expr, Premise], _) :-
-    Premise = premise; 
-    Premise = assumption,
+valid_line(Prems, _, [LineNr, Expr, premise], _) :-
+    % Premise = premise; 
+    % Premise = assumption,
     member(Expr, Prems),
     !,
     write("is part of premise"), nl.
+
+valid_line(_, _, [LineNr, Expr, assumption], _) :-
+    write("is assumption"), nl.
 
 % copy rule
 valid_line(_,_, [LineNr, CopyExpr, copy(X)], ValidatedSoFar) :-
@@ -67,8 +78,11 @@ valid_line(_,_, [LineNr, CopyExpr, copy(X)], ValidatedSoFar) :-
 
 % Implication Introduction (→I) -> need box
 % [Box | _] from ValidatedSoFar (in valid_proof_validator)
-valid_line(_,_, [LineNr, imp(Antecedent, Conclusion), impint(X,Y)], [Box | _]) :-
-    member([X, Antecedent, assumption], Box), 
+valid_line(_,_, [LineNr, imp(Antecedent, Conclusion), impint(X,Y)], ValidatedSoFar) :-
+    % member([X, Antecedent, assumption], Box), 
+    % member([Y, Conclusion, _], Box),
+    find_box(ValidatedSoFar, X, Y, Box),
+    member([X, Antecedent, assumption], Box),
     member([Y, Conclusion, _], Box),
     write("impint"), nl.
 
@@ -146,7 +160,10 @@ valid_line(_, _, [LineNr, OrelExpr, orel(OrExprLine, StartFirst, EndFirst, Start
     write("orel"), nl.
 
 % Negation Introduction (¬I) -> need box
-valid_line(_,_,[LineNr, neg(Negand), negint(X, Y)], [Box| _]) :-
+valid_line(_,_,[LineNr, neg(Negand), negint(X, Y)], ValidatedSoFar) :-
+    % member([X, Negand, assumption], Box),
+    % member([Y, cont, _], Box),
+    find_box(ValidatedSoFar, X, Y, Box), 
     member([X, Negand, assumption], Box),
     member([Y, cont, _], Box),
     write("negint"), nl. 
@@ -183,7 +200,10 @@ valid_line(_,_,[LineNr, MtExpr, mt(X, Y)], ValidatedSoFar) :-
     write("mt"), nl.
 
 % PBC rule -> need box
-valid_line(_,_, [LineNr, Expr, pbc(X, Y)], [Box |_]) :-
+valid_line(_,_, [LineNr, Expr, pbc(X, Y)], ValidatedSoFar) :-
+    % member([X, neg(Expr), assumption], Box), 
+    % member([Y, cont, _], Box),
+    find_box(ValidatedSoFar, X, Y, Box), 
     member([X, neg(Expr), assumption], Box), 
     member([Y, cont, _], Box),
     write("pbc"), nl.
@@ -201,4 +221,4 @@ verify(InputFileName) :-
     write(Goal), nl,
     write(Proof), nl, nl,
     nl,
-    ( valid_proof(Prems, Goal, Proof) -> nl, write('yes'), nl ; nl, write('no') ), nl.
+    (valid_proof(Prems, Goal, Proof) -> write("yes"), nl; write("no"), nl).
