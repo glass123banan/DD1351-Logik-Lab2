@@ -34,6 +34,10 @@ is_box(BoxStep, ValidatedSoFar) :-
 % recursively checks steps inside a box
 check_boxes([], _).
 
+check_boxes([[LineNr, Expr, assumption] | RestOfBox], ValidatedSoFar) :-
+    \+ member([_, _, assumption], RestOfBox),
+    check_boxes(RestOfBox, [[LineNr, Expr, assumption] | ValidatedSoFar]).
+
 % If the step is a nested box, validate it recursively
 check_boxes([NestedBox | RestOfBox], ValidatedSoFar) :-
     is_box(NestedBox, ValidatedSoFar),                 
@@ -42,6 +46,7 @@ check_boxes([NestedBox | RestOfBox], ValidatedSoFar) :-
 
 check_boxes([StepInBox|RestOfBox], ValidatedSoFar) :-
     \+is_box(StepInBox, ValidatedSoFar),
+    \+ StepInBox = [_,_, assumption],
     valid_line(_,_,StepInBox, ValidatedSoFar),
     check_boxes(RestOfBox, [StepInBox | ValidatedSoFar]). 
 
@@ -50,26 +55,31 @@ check_boxes([StepInBox|RestOfBox], ValidatedSoFar) :-
 
 % check if step belongs to prems
 valid_line(Prems, _, [LineNr, Expr, premise], _) :-
-    % Premise = premise; 
-    % Premise = assumption,
     member(Expr, Prems),
     !.
 
-valid_line(_, _, [LineNr, Expr, assumption], _).
+valid_line(_, _, [LineNr, Expr, assumption], _) :-
+    is_box([LineNr, Expr, assumption], ValidatedSoFar).     % problem line
 
 % copy rule
 valid_line(_,_, [LineNr, CopyExpr, copy(X)], ValidatedSoFar) :-
     member([X, CopiedExpr, _], ValidatedSoFar),
     CopyExpr = CopiedExpr.
 
+% Last predicate to find last element in list 
+% Basecase: If list has only X, X is last element
+last(X,[X]).
+
+% Recursive case: ignore head and match X with Z
+last(X,[_|Z]) :- 
+    last(X,Z).
+
 % Implication Introduction (→I) -> need box
 % [Box | _] from ValidatedSoFar (in valid_proof_validator)
 valid_line(_,_, [LineNr, imp(Antecedent, Conclusion), impint(X,Y)], ValidatedSoFar) :-
-    % member([X, Antecedent, assumption], Box), 
-    % member([Y, Conclusion, _], Box),
     find_box(ValidatedSoFar, X, Y, Box),
     member([X, Antecedent, assumption], Box),
-    member([Y, Conclusion, _], Box).
+    last([Y, Conclusion, _], Box).
 
 % Implication Elimination (Modus Ponens, →E)
 valid_line(_, _, [LineNr, ImpelExpr, impel(X, Y)], ValidatedSoFar) :-
@@ -115,16 +125,16 @@ valid_line(_, _, [LineNr, OrelExpr, orel(OrExprLine, StartFirst, EndFirst, Start
     member([OrExprLine, OrExpr, _], ValidatedSoFar),
     find_box(ValidatedSoFar, StartFirst, EndFirst, Box1), 
     Box1 = [[StartFirst, LeftDisjunct, assumption] | _],
-    member([EndFirst, OrelExpr, _], Box1),    
+    last([EndFirst, OrelExpr, _], Box1),
     find_box(ValidatedSoFar, StartSecond, EndSecond, Box2),
     Box2 = [[StartSecond, RightDisjunct, assumption] | _],
-    member([EndSecond, OrelExpr, _], Box2).
+    last([EndSecond, OrelExpr, _], Box2).
 
 % Negation Introduction (¬I) -> need box
 valid_line(_,_,[LineNr, neg(Negand), negint(X, Y)], ValidatedSoFar) :-
     find_box(ValidatedSoFar, X, Y, Box), 
     member([X, Negand, assumption], Box),
-    member([Y, cont, _], Box). 
+    last([Y, cont, _], Box).
 
 % Negation Elimination (¬E)
 valid_line(_,_,[LineNr, NegExpr, negel(X, Y)], ValidatedSoFar) :-
@@ -156,7 +166,7 @@ valid_line(_,_,[LineNr, MtExpr, mt(X, Y)], ValidatedSoFar) :-
 valid_line(_,_, [LineNr, Expr, pbc(X, Y)], ValidatedSoFar) :-
     find_box(ValidatedSoFar, X, Y, Box), 
     member([X, neg(Expr), assumption], Box), 
-    member([Y, cont, _], Box).
+    last([Y, cont, _], Box).
 
 % Law of the Excluded Middle (LEM)
 valid_line(_,_,[LineNr, or(LemExpr, neg(LemExpr)), lem], ValidatedSoFar).

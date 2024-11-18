@@ -21,9 +21,9 @@ valid20.txt passed
 valid21.txt passed
 valid22.txt passed
 valid23.txt passed
-invalid01.txt failed. The proof is invalid but your program accepted it!
+invalid01.txt passed
 invalid02.txt passed
-invalid03.txt failed. The proof is invalid but your program accepted it!
+invalid03.txt passed
 invalid04.txt passed
 invalid05.txt passed
 invalid06.txt passed
@@ -36,23 +36,23 @@ invalid12.txt passed
 invalid13.txt passed
 invalid14.txt passed
 invalid15.txt passed
-invalid16.txt failed. The proof is invalid but your program accepted it!
+invalid16.txt passed
 invalid17.txt passed
 invalid18.txt passed
 invalid19.txt passed
 invalid20.txt passed
 invalid21.txt passed
-invalid22.txt failed. The proof is invalid but your program accepted it!
+invalid22.txt passed
 invalid23.txt passed
 invalid24.txt passed
 invalid25.txt passed
 invalid26.txt passed
-invalid27.txt failed. The proof is invalid but your program accepted it!
+invalid27.txt passed
 invalid28.txt passed
 invalid29.txt failed. The proof is invalid but your program accepted it!
 invalid30.txt passed
 invalid31.txt passed
-invalid32.txt failed. The proof is invalid but your program accepted it!
+invalid32.txt passed
 invalid33.txt passed
 invalid34.txt passed
 invalid35.txt passed
