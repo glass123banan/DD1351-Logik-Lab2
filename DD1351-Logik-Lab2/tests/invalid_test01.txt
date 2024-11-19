@@ -1,0 +1,9 @@
+[and(p, q)].
+and(q, p).
+[
+    [1, and(p, q),      premise],
+    [2, p,              andel2(1)],
+    [3, q,              andel1(1)],
+    [4, and(q, p),     andint(3, 4)]
+].
+% wrong nr for the andel rules
