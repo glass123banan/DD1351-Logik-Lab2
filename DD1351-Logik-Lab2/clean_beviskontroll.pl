@@ -1,9 +1,3 @@
-% propositions: implication, negation, and, or
-imp(P, Q).   % p -> q
-neg(P).      % !p
-and(P, Q).   % p n q
-or(P, Q).    % p v q
-
 % valid_proof calls on helper func w validated steps
 valid_proof(Prems, Goal, ProofSteps) :-
     valid_proof_validator(Prems, Goal, ProofSteps, []).
@@ -15,19 +9,19 @@ valid_proof_validator(_, Goal, [], [LastStep | ValidatedSoFar]) :-
 
 % box recursive case: checks if its a box -> handles boxes
 valid_proof_validator(Prems, Goal, [Box | RestOfProof], ValidatedSoFar) :-
-    is_box(Box, ValidatedSoFar),       
+    is_box(Box),       
     check_boxes(Box, ValidatedSoFar),  % Validate the content of the box
     !,      % if find box, dont go to recursive case
     valid_proof_validator(Prems, Goal, RestOfProof, [Box | ValidatedSoFar]).  
 
 % recursive case: helper func that stores checked lines in ValidatedSoFar -> handles regular lines
 valid_proof_validator(Prems, Goal, [Step | RestOfProof], ValidatedSoFar) :-
-    \+is_box(Step, ValidatedSoFar),
+    \+is_box(Step),
     valid_line(Prems, Goal, Step, ValidatedSoFar), 
     valid_proof_validator(Prems, Goal, RestOfProof, [Step | ValidatedSoFar]).
 
 % box control - If list in list and first step is assumption -> box
-is_box(BoxStep, ValidatedSoFar) :-
+is_box(BoxStep) :-
     is_list(BoxStep),
     BoxStep = [[_,_, assumption]| _].
 
@@ -40,18 +34,18 @@ check_boxes([[LineNr, Expr, assumption] | RestOfBox], ValidatedSoFar) :-
 
 % If the step is a nested box, validate it recursively
 check_boxes([NestedBox | RestOfBox], ValidatedSoFar) :-
-    is_box(NestedBox, ValidatedSoFar),                 
+    is_box(NestedBox),                 
     check_boxes(NestedBox, ValidatedSoFar),  % Validate the nested box                  
     check_boxes(RestOfBox, [NestedBox |ValidatedSoFar]). 
 
 check_boxes([StepInBox|RestOfBox], ValidatedSoFar) :-
-    \+is_box(StepInBox, ValidatedSoFar),
+    \+is_box(StepInBox),
     \+ StepInBox = [_,_, assumption],
     valid_line(_,_,StepInBox, ValidatedSoFar),
     check_boxes(RestOfBox, [StepInBox | ValidatedSoFar]). 
 
 % Check each individual line if its valid
-% Format per proof line: [LineNr, Expr, Rule]
+% Format for each proof line: [LineNr, Expr, Rule]
 
 % check if step belongs to prems
 valid_line(Prems, _, [LineNr, Expr, premise], _) :-
@@ -59,7 +53,7 @@ valid_line(Prems, _, [LineNr, Expr, premise], _) :-
     !.
 
 valid_line(_, _, [LineNr, Expr, assumption], _) :-
-    is_box([LineNr, Expr, assumption], ValidatedSoFar).     % problem line
+    is_box([LineNr, Expr, assumption]).     
 
 % copy rule
 valid_line(_,_, [LineNr, CopyExpr, copy(X)], ValidatedSoFar) :-

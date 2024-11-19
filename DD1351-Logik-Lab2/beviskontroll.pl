@@ -1,9 +1,3 @@
-% propositions: implication, negation, and, or
-imp(P, Q).   % p -> q
-neg(P).      % !p
-and(P, Q).   % p n q
-or(P, Q).    % p v q
-
 % valid_proof calls on helper func w validated steps
 valid_proof(Prems, Goal, ProofSteps) :-
     valid_proof_validator(Prems, Goal, ProofSteps, []).
@@ -224,7 +218,7 @@ valid_line(_,_, [LineNr, Expr, pbc(X, Y)], ValidatedSoFar) :-
     write("pbc"), nl.
 
 % Law of the Excluded Middle (LEM)
-valid_line(_,_,[LineNr, or(LemExpr, neg(LemExpr)), lem], ValidatedSoFar),
+valid_line(_,_,[LineNr, or(LemExpr, neg(LemExpr)), lem], ValidatedSoFar) :-
     write("lem"), nl.
 
 % verify -> read file
@@ -236,4 +230,4 @@ verify(InputFileName) :-
     write(Goal), nl,
     write(Proof), nl, nl,
     nl,
-    valid_proof(Prems, Goal, Proof).
+    (valid_proof(Prems, Goal, Proof) -> write("yes"), nl ; write("no"), nl).
